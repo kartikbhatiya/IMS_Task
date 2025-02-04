@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MoleculeController;
+use App\Http\Controllers\DraftProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,8 +19,29 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/user', [AuthController::class, 'user']);
+//     Route::post('/logout', [AuthController::class, 'logout']);
+// });
+
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{id}', [CategoryController::class, 'get']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/molecule', [MoleculeController::class, 'index']);
+    Route::get('/molecule/{id}', [MoleculeController::class, 'get']);
+    Route::post('/molecule', [MoleculeController::class, 'store']);
+    Route::put('/molecule', [MoleculeController::class, 'update']);
+    Route::delete('/molecule/{id}', [MoleculeController::class, 'delete']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/draft-product', [DraftProductController::class, 'index']);
+    Route::get('/draft-product/{id}', [DraftProductController::class, 'get']);
+    Route::post('/draft-product', [DraftProductController::class, 'store']);
+    Route::put('/draft-product', [DraftProductController::class, 'update']);
+    Route::patch('/draft-product/{id}', [DraftProductController::class, 'publish']);
+    Route::delete('/draft-product/{id}', [DraftProductController::class, 'delete']);
 });

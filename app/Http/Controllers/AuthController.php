@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\ResponseTrait;
 use App\Models\User;
+use Exception;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
+    use ResponseTrait;
     public function register(Request $request)
     {
         try {
             $fields = $request->validate([
                 'username' => 'required|string|unique:users,username',
-                'password' => 'required|string',
+                'password' => 'required|string|min:8',
             ]);
 
             $user = User::create([
@@ -26,31 +30,41 @@ class AuthController extends Controller
                 'password' => Hash::make($fields['password']),
             ]);
 
-            if ($user) {
-                return new JsonResponse(['user' => $user], 201);
-            } else {
-                return new JsonResponse(['message' => 'Registration failed'], 500);
-            }
+            return $this->Res(201, ['user' => $user], 'Registration Successfull');
         } catch (ValidationException $e) {
-
-            return new JsonResponse(['errors' => $e->errors()], 422);
+            return $this->ErrRes(422, $e->errors(), 'Validation Errors');
+        } catch (Exception $e) {
+            return $this->ErrRes(500, ['errors' => $e], 'Internal Server Error');
         }
     }
 
     public function login(Request $request)
     {
-        $fields = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string|min:8'
-        ]);
+        try {
+            $fields = $request->validate([
+                'username' => 'required|string',
+                'password' => 'required|string|min:8'
+            ]);
 
-        if (Auth::attempt($fields)) {
-            $user = DB::table('users');
+            $user = User::where('username', $fields['username'])->first();
+
+            if (!$user) {
+                return $this->ErrRes(404, ['username' => 'Username does not exist'], 'Logged In Failed');
+            }
+
+            // Check if the password is correct
+            if (!Hash::check($fields['password'], $user->password)) {
+                return $this->ErrRes(404, ['password' => 'Password is Incorrect'], 'Logged In Failed');
+            }
+
+            $user = User::where('username', $fields['username'])->first();
             $token = $user->createToken('auth')->plainTextToken;
 
-            return new JsonResponse(['user' => $user, 'token' => $token, 'message' => 'Login Successfull.'], 200);
-        } else {
-            return new JsonResponse(['message' => 'Login failed'], 401);
+            // $cookie = cookie('token', $token, 60); // 60 minutes
+
+            return $this->Res(200, ['user' => $user, 'token' => $token], 'Login Successful.');
+        } catch (ValidationException $e) {
+            return $this->ErrRes(422, $e->errors(), 'Validation Errors');
         }
     }
 }
