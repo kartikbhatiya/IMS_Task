@@ -16,7 +16,7 @@ class ValidMolecule implements Rule
 
     public function passes($attribute, $value)
     {
-        return Molecule::where('id', $value)->exists();
+        return Molecule::where([['id', $value],['is_deleted', 0]])->exists();
     }
 
     public function message()

@@ -3,30 +3,27 @@
 namespace App\Http\Repositories;
 
 use App\Http\Controllers\ResponseTrait;
-use App\http\Requests\StoreDraftProductRequest;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
+
+use App\Jobs\PublishProduct;
+use App\Jobs\UpdatePublishedProduct;
 
 use App\Models\ProductMolecules;
 use App\Models\DraftProduct;
 use App\Models\Molecule;
-use App\Models\Category;
-use App\Models\User;
+use App\Models\PublishedProduct;
 
-
-use Illuminate\Validation\ValidationException;
 use Exception;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class DraftProductRepository
 {
 
     use ResponseTrait;
 
-    public function index()
+    public function index($per_page = 10)
     {
-        $products = DraftProduct::paginate(5);
+        $products = DraftProduct::orderBy('id')->paginate($per_page);
 
         $metaData = [
             "current_page" => $products->currentPage(),
@@ -51,14 +48,12 @@ class DraftProductRepository
 
             DB::beginTransaction();
             $product = DraftProduct::create($data);
-
-            $product_code = $request->input('product_code');
     
             $productMolecules = [];
     
             foreach ($data['molecules'] as $molecule_id) {
                 $productMolecules[] = [
-                    'product_code' => $product_code,
+                    'product_code' => $product->product_code,
                     'molecule_id' => $molecule_id,
                     'created_by' => $request->input('created_by')
                 ];
@@ -87,6 +82,9 @@ class DraftProductRepository
             $existingData = $product->toArray();
 
             $changedData = array_diff_assoc($data, $existingData);
+
+            $changedData['is_published'] = false;
+            $changedData['updated_at'] = now();
 
             if (!empty($changedData)) {
                 $product->update($changedData);
@@ -137,16 +135,38 @@ class DraftProductRepository
                 ProductMolecules::insert($productMolecules);
             }
 
-            $molecules = Molecule::where('id', $newMolecules)->pluck('name')->toArray();
+            $molecules = Molecule::whereIn('id', $newMolecules)->pluck('name')->toArray();
 
             $product->combination_string = implode('+', $molecules);
+            $product->is_published = false;
             $product->updated_by = $request->input('updated_by');
+            $product->updated_at = now();
             $product->save();
 
             DB::commit();
             return $this->Res(200, $product, 'Product updated successfully');
         } catch (Exception $e) {
             DB::rollBack();
+            return $this->ErrRes(500, $e, 'Internal server error');
+        }
+    }
+
+    public function publish($product_code){
+        try{
+            $product = DraftProduct::where('product_code', $product_code)->first();
+            if(!$product){
+                return $this->ErrRes(404, [], 'Product not found');
+            }
+            if(PublishedProduct::where('product_code', $product_code)->first() ){
+                UpdatePublishedProduct::dispatch($product_code, auth()->user()->id);
+            }
+            else{
+                PublishProduct::dispatch($product_code, auth()->user()->id);
+            }
+
+            return $this->Res(200, [], 'Product published successfully');
+        }
+        catch(Exception $e){
             return $this->ErrRes(500, $e, 'Internal server error');
         }
     }

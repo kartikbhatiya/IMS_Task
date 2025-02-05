@@ -23,7 +23,7 @@ class StoreDraftProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_name' => 'required|string|max:255',
+            'product_name' => 'required|string|max:255|unique:draft_products,product_name',
             'product_code' => 'required|string|max:255|unique:draft_products,product_code',
             'manufacturer_name' => 'required|string|max:255',
             'mrp' => 'required|numeric|min:0',

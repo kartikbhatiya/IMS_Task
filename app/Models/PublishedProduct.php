@@ -5,33 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductMolecules extends Model
+class PublishedProduct extends Model
 {
     use HasFactory;
 
-    protected $table = 'product_molecules';
+    protected $table = 'published_products';
 
     protected $fillable = [
+        'product_name',
         'product_code',
-        'molecule_id',
+        'manufacturer_name',
+        'mrp',
+        'combination_string',
+        'category_id',
+        'is_banned',
+        'is_active',
+        'is_discontinued',
+        'is_assured',
+        'is_refrigerated',
+        'is_deleted',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
 
-    public function molecule()
-    {
-        return $this->belongsTo(Molecule::class, 'molecule_id');
-    }
 
-    public function product()
+    public function category()
     {
-        return $this->belongsTo(DraftProduct::class, 'product_code');
-    }
-
-    public function moleculesForProduct()
-    {
-        return $this->hasMany(Molecule::class, 'molecule_id');
+        return $this->belongsTo(Category::class);
     }
 
     public function createdBy()

@@ -11,6 +11,8 @@ class DraftProduct extends Model
 {
     use HasFactory;
 
+    protected $table = 'draft_products';
+
     protected $fillable = [
         'product_name',
         'product_code',

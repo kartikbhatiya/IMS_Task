@@ -9,6 +9,8 @@ class Molecule extends Model
 {
     use HasFactory;
 
+    protected $table = 'molecules';
+
     protected $fillable = [
         'slug',
         'name',

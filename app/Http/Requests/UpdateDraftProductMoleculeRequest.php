@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
 use App\Rules\ValidMolecule;
-use PHPUnit\Framework\Constraint\IsTrue;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UpdateDraftProductMoleculeRequest extends FormRequest
 {
@@ -34,5 +35,27 @@ class UpdateDraftProductMoleculeRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        if ($this->has('molecules')) {
+            $this->merge([
+                'molecules' => array_map('intval', explode(',', $this->molecules)),
+            ]);
+        }
+
+        $this->merge([
+            'updated_by' => auth()->user()->id,
+        ]);
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new ValidationException($validator, response()->json([
+            'success' => false,
+            'message' => 'Validation errors',
+            'errors' => $validator->errors()
+        ], 422));
     }
 }

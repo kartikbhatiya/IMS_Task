@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\http\Repositories\DraftProductRepository;
-
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 
 use App\Models\DraftProduct;
+use App\http\Repositories\DraftProductRepository;
 use App\Http\Requests\StoreDraftProductRequest;
 use App\Http\Requests\UpdateDraftProductRequest;
 use App\Http\Requests\UpdateDraftProductMoleculeRequest;
@@ -19,9 +19,12 @@ class DraftProductController extends Controller
         $this->draftProductRepository = $draftProductRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->draftProductRepository->index();
+        $request->validate([
+            'per_page' => 'integer|min:1',
+        ]);
+        return $this->draftProductRepository->index($request->per_page ?? 10);
     }
 
     /**
@@ -61,5 +64,10 @@ class DraftProductController extends Controller
             return $this->ErrRes(422, $e->errors(), 'Validation Error');
         }
         
+    }
+
+    public function publish($product_code)
+    {
+        return $this->draftProductRepository->publish($product_code);
     }
 }

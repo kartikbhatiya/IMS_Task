@@ -17,9 +17,12 @@ class MoleculeController extends Controller
         $this->moleculeRepository = $moleculeRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->moleculeRepository->index();
+        $request->validate([
+            'per_page' => 'integer|min:1',
+        ]);
+        return $this->moleculeRepository->index($request->per_page ?? 5);
     }
 
     public function get($id)

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MoleculeController;
 use App\Http\Controllers\DraftProductController;
+use App\Http\Controllers\PublishedProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +50,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/draft-product', [DraftProductController::class, 'index']);
     Route::get('/draft-product/{id}', [DraftProductController::class, 'get']);
     Route::post('/draft-product', [DraftProductController::class, 'store']);
-    Route::put('/draft-product', [DraftProductController::class, 'update']);
+    Route::put('/draft-product', [DraftProductController::class, 'updateData']);
+    Route::put('/draft-product/molecules', [DraftProductController::class, 'updateMolecules']);   
     Route::patch('/draft-product/{id}', [DraftProductController::class, 'publish']);
     Route::delete('/draft-product/{id}', [DraftProductController::class, 'delete']);
+
+    Route::patch('/products', [PublishedProductController::class, 'changeStatus']);
 });
+
+Route::get('/products', [PublishedProductController::class, 'index']);
+Route::get('/products/search', [PublishedProductController::class, 'search']);
+Route::get('/products/{id}', [PublishedProductController::class, 'get']);
+

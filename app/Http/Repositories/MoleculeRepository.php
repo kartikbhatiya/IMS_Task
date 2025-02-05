@@ -19,9 +19,9 @@ class MoleculeRepository
 
     use ResponseTrait;
 
-    public function index()
+    public function index($per_page)
     {
-        $molecules = Molecule::paginate(5);
+        $molecules = Molecule::OrderBy('id')->paginate($per_page);
 
         $metaData = [
             "current_page" => $molecules->currentPage(),
