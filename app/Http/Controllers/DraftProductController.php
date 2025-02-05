@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\http\Repositories\DraftProductRepository;
 
+use Illuminate\Validation\ValidationException;
+
 use App\Models\DraftProduct;
 use App\Http\Requests\StoreDraftProductRequest;
 use App\Http\Requests\UpdateDraftProductRequest;
+use App\Http\Requests\UpdateDraftProductMoleculeRequest;
 
 class DraftProductController extends Controller
 {
@@ -26,15 +29,37 @@ class DraftProductController extends Controller
      */
     public function store(StoreDraftProductRequest $request)
     {
-        return $this->draftProductRepository->store($request);
+        try {
+            $request->validated();
+            return $this->draftProductRepository->store($request);
+        } catch (ValidationException $e) {
+            return $this->ErrRes(422, $e->errors(), 'Validation Error');
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDraftProductRequest $request, DraftProduct $draftProduct)
+    public function updateData(UpdateDraftProductRequest $request)
     {
-        //
+
+        try {
+            $request->validated();
+            return $this->draftProductRepository->updateData($request);
+        } catch (ValidationException $e) {
+            return $this->ErrRes(422, $e->errors(), 'Validation Error');
+        }
+        
     }
 
+    public function updateMolecules(UpdateDraftProductMoleculeRequest $request)
+    {
+        try {
+            $request->validated();
+            return $this->draftProductRepository->updateMolecules($request);
+        } catch (ValidationException $e) {
+            return $this->ErrRes(422, $e->errors(), 'Validation Error');
+        }
+        
+    }
 }

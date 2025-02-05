@@ -22,10 +22,12 @@ class UpdateDraftProductRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id'=>'required|exists:draft_products,id',
             'product_name' => 'string|max:255',
             'product_code' => 'string|max:255|unique:draft_products,product_code',
             'manufacturer_name' => 'string|max:255',
             'mrp' => 'numeric|min:0',
+            'molecules' => '',
             'category_id' => 'exists:categories,id',
             'is_banned' => 'boolean',
             'is_active' => 'boolean',
@@ -34,10 +36,20 @@ class UpdateDraftProductRequest extends FormRequest
             'is_refrigerated' => 'boolean',
             'is_deleted' => 'boolean',
             'is_published' => 'boolean',
-            'created_by' => 'exists:users,id',
-            'updated_by' => 'nullable|exists:users,id',
-            'deleted_by' => 'nullable|exists:users,id',
-            'molecules' => '',
+            'updated_by' => 'required|exists:users,id',
         ];
+    }
+
+    public function prepareValidation()
+    {
+        if ($this->has('molecules')) {
+            $this->merge([
+                'molecules' => array_map('intval', explode(',', $this->molecules)),
+            ]);
+        }
+
+        $this->merge([
+            'updated_by' => auth()->user()->id,
+        ]);
     }
 }

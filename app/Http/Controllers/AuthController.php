@@ -22,7 +22,10 @@ class AuthController extends Controller
         try {
             $fields = $request->validate([
                 'username' => 'required|string|unique:users,username',
-                'password' => 'required|string|min:8',
+                'password' => 'required|string|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[^a-zA-Z0-9]/',
+            ], [
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.regex' => 'The password must contain at least one lowercase letter. one uppercase letter, one number, and one special character.',
             ]);
 
             $user = User::create([
@@ -42,17 +45,14 @@ class AuthController extends Controller
     {
         try {
             $fields = $request->validate([
-                'username' => 'required|string',
-                'password' => 'required|string|min:8'
+                'username' => 'required|string|exists:users,username',
+                'password' => 'required|string'
+            ], [
+                'username.exists' => 'Username does not exist'
             ]);
 
             $user = User::where('username', $fields['username'])->first();
 
-            if (!$user) {
-                return $this->ErrRes(404, ['username' => 'Username does not exist'], 'Logged In Failed');
-            }
-
-            // Check if the password is correct
             if (!Hash::check($fields['password'], $user->password)) {
                 return $this->ErrRes(404, ['password' => 'Password is Incorrect'], 'Logged In Failed');
             }
@@ -65,6 +65,15 @@ class AuthController extends Controller
             return $this->Res(200, ['user' => $user, 'token' => $token], 'Login Successful.');
         } catch (ValidationException $e) {
             return $this->ErrRes(422, $e->errors(), 'Validation Errors');
+        }
+    }
+
+    public function logout(Request $request){
+        try {
+            $request->user()->tokens()->delete();
+            return $this->Res(200, [], 'Logged Out Successfully');
+        } catch (Exception $e) {
+            return $this->ErrRes(500, ['errors' => $e], 'Internal Server Error');
         }
     }
 }

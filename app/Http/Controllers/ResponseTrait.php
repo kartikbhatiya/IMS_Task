@@ -6,7 +6,7 @@ trait ResponseTrait
 {
     protected function Res($code, $data = [], $message = "")
     {    
-        return response()->json(['success' => false ,'statusCode' => $code, 'message' => $message , 'data'=>$data]);
+        return response()->json(['success' => true ,'statusCode' => $code, 'message' => $message , 'data'=>$data]);
     }
 
     protected function ErrRes($code, $errors = [], $message = "")

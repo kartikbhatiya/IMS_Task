@@ -21,13 +21,21 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::get('/user', [AuthController::class, 'user']);
-//     Route::post('/logout', [AuthController::class, 'logout']);
-// });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', function(){
+        return auth()->user();
+    });
+});
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'get']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/categories', [CategoryController::class, 'store']);
+    // Route::put('/categories', [CategoryController::class, 'update']);
+    // Route::delete('/categories/{id}', [CategoryController::class, 'delete']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/molecule', [MoleculeController::class, 'index']);

@@ -9,6 +9,8 @@ use App\http\Controllers\ResponseTrait;
 
 use Illuminate\Validation\ValidationException;
 
+use App\Rules\ValidMolecule;
+
 class StoreDraftProductRequest extends FormRequest
 {
     use ResponseTrait;
@@ -26,18 +28,35 @@ class StoreDraftProductRequest extends FormRequest
             'manufacturer_name' => 'required|string|max:255',
             'mrp' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
+            'molecules' => 'required|array',
+            'molecules.*' => function ($attribute, $value, $fail) {
+                $rule = new ValidMolecule($value);
+                if (!$rule->passes($attribute, $value)) {
+                    $fail($rule->message());
+                }
+            },
             'is_banned' => 'boolean',
+            'is_refrigerated' => 'boolean',
             'is_active' => 'boolean',
             'is_discontinued' => 'boolean',
             'is_assured' => 'boolean',
-            'is_refrigerated' => 'boolean',
             'is_deleted' => 'boolean',
             'is_published' => 'boolean',
             'created_by' => 'required|exists:users,id',
-            'updated_by' => 'nullable|exists:users,id',
-            'deleted_by' => 'nullable|exists:users,id',
-            'molecules' => 'required|string',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        if ($this->has('molecules')) {
+            $this->merge([
+                'molecules' => array_map('intval', explode(',', $this->molecules)),
+            ]);
+        }
+
+        $this->merge([
+            'created_by' => auth()->user()->id,
+        ]); 
     }
 
     protected function failedValidation(Validator $validator)

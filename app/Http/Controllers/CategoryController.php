@@ -17,4 +17,16 @@ class CategoryController extends Controller
     public function get($id){
         return $this->Res(200, Category::find($id), "Category fetched successfully");
     }
+
+    public function store(Request $request){
+        $request->validate([
+            'name' => 'required|string|unique:categories,name',
+        ]);
+
+        $data = $request->all();
+        $data['created_by'] = auth()->user()->id;
+
+        $category = Category::create($data);
+        return $this->Res(201, $category, "Category created successfully");
+    }
 }

@@ -34,7 +34,7 @@ class MoleculeRepository
         return $this->Res(200, [
             'molecules' => $molecules->items(),
             'meta' => $metaData
-        ], "Molecules Data Successfully Recieved.");
+        ], "Molecules Data Successfully Retrieved.");
     }
 
     public function store($request)

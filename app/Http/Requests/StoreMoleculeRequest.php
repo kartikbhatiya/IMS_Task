@@ -33,6 +33,13 @@ class StoreMoleculeRequest extends FormRequest
         ];
     }
 
+    public function messages(){
+        return [
+            'name.unique' => 'Name already exists',
+            'slug.unique' => 'Name already exists',
+        ];
+    }
+
     protected function prepareForValidation()
     {
         $this->merge([
