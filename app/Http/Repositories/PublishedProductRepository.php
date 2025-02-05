@@ -69,12 +69,12 @@ class PublishedProductRepository
     }
 
     public function changeStatus($request){
-        $product = PublishedProduct::find($request->id);
+        $product = PublishedProduct::where('product_code', $request->product_code)->first();
         if (!$product) {
             return $this->ErrRes(404, null, 'Product not found');
         }
 
-        $product->status = $request->status;
+        $product->is_active = $request->status;
         $product->save();
 
         return $this->Res(200, $product, 'Product status updated successfully');

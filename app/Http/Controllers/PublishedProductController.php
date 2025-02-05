@@ -52,7 +52,7 @@ class PublishedProductController extends Controller
 
     public function get($id)
     {
-        if(Cache::has('product_' . $id)){
+        if (Cache::has('product_' . $id)) {
             $product = Cache::get('product_' . $id);
             return $this->Res(200, $product, 'Product data successfully retrieved from Cache');
         }
@@ -66,12 +66,15 @@ class PublishedProductController extends Controller
 
     public function changeStatus(Request $request)
     {
-        $request->validate([
-            'id' => 'required|integer',
-            'status' => 'required|boolean',
-        ]);
+        try {
+            $request->validate([
+                'product_code' => 'required|string',
+                'status' => 'required|boolean',
+            ]);
 
-        return $this->publishedProductRepository->changeStatus($request);
+            return $this->publishedProductRepository->changeStatus($request);
+        } catch (ValidationException $e) {
+            return $this->ErrRes(422, $e->errors(), 'Validation Error');
+        }
     }
-
 }
