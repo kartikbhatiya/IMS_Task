@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
-use App\http\Controllers\ResponseTrait;
+use App\Http\Controllers\ResponseTrait;
 
 use Illuminate\Validation\ValidationException;
 

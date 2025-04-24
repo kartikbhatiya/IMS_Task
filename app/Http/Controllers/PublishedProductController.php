@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\PublishedProduct;
-use App\http\Repositories\PublishedProductRepository;
+use App\Http\Repositories\PublishedProductRepository;
 
 class PublishedProductController extends Controller
 {

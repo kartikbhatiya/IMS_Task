@@ -6,7 +6,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 
 use App\Models\DraftProduct;
-use App\http\Repositories\DraftProductRepository;
+use App\Http\Repositories\DraftProductRepository;
 use App\Http\Requests\StoreDraftProductRequest;
 use App\Http\Requests\UpdateDraftProductRequest;
 use App\Http\Requests\UpdateDraftProductMoleculeRequest;

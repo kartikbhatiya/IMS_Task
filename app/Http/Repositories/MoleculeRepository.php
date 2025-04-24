@@ -4,8 +4,8 @@ namespace App\Http\Repositories;
 
 use App\Http\Controllers\ResponseTrait;
 use Illuminate\Http\Request;
-use App\http\Requests\StoreMoleculeRequest;
-use App\http\Requests\UpdateMoleculeRequest;
+use App\Http\Requests\StoreMoleculeRequest;
+use App\Http\Requests\UpdateMoleculeRequest;
 use App\Models\DraftProduct;
 use App\Models\Category;
 use App\Models\Molecule;
